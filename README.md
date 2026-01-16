@@ -48,12 +48,14 @@ For a specific case defined by `(MODE, MATERIAL, LAMINATE)`, the script executes
 
 Place the following core files in the **repository root**:
 
-
+```text
+.
 ├── ga_abaqus_cohesive_fit.py      # Main Genetic Algorithm script
 ├── Ct_Shell.py                   # Abaqus CAE noGUI script
 ├── Mechanical_properties.csv      # Material/Case database
 └── Experimental/                 # Folder for reference data
     └── Exp_{MODE}_{MATERIAL}_{LAMINATE}.txt
+```
 
 ## 📊 Experimental File Format
 
