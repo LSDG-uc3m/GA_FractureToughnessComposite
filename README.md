@@ -1,8 +1,8 @@
 # GA_FractureToughnessComposite
-===============================
+
 
 ## Purpose
-----------
+
 This repository provides a Python script that calibrates (G, Gm, n) parameters of a cohesive law
 using a Genetic Algorithm (GA) and Abaqus CAE simulations (noGUI).
 
@@ -18,7 +18,7 @@ Intended audience:
   * Cohesive-zone modeling (delamination, fracture, etc.)
 
 ## What the script does
------------------------
+
 For a specific case defined by `(MODE, MATERIAL, LAMINATE)`, the script executes the following pipeline:
 
 1.  **Load Experimental Data** Imports the reference curve from:  
@@ -75,6 +75,81 @@ Example:
 0.10;120.5
 0.20;250.1
 
+## 🛠️ Requirements
+
+To ensure the calibration script runs correctly, please verify the following prerequisites:
+
+### 🐍 Python Environment
+* **Version:** Python 3.9+ (Recommended: **3.10** or **3.11**).
+* **Packages:** Install all necessary dependencies using the provided requirements file:
+  ```bash
+  pip install -r requirements.txt
+- Python 3.9+ (recommended 3.10/3.11)
+- Abaqus installed and callable as "abaqus" from terminal or Abaqus Command Prompt
+
+IMPORTANT (Windows):
+- Most reliable: run from "Abaqus Command Prompt"
+  OR set environment variable:
+    ABAQUS_BAT = full\path\to\abaqus.bat
+- numpy
+- matplotlib
+- scikit-learn
+- deap
+
+
+## How to run
+
+1. Verify these exist:
+    - Mechanical_properties.csv (repo root)
+    - Ct_Shell.py (repo root)
+    - ./Experimental/Exp_{MODE}_{MATERIAL}_{LAMINATE}.txt
+
+2. Edit ga_abaqus_cohesive_fit.py:
+    - MODE, MATERIAL, LAMINATE
+    - POP_SIZE, N_GENERATIONS, bounds, etc.
+    - LIVE_PLOTS = False if you want terminal-only execution
+
+3. Run:
+    python ga_abaqus_cohesive_fit.py
+
+## Outputs
+
+Inside ./{MODE}_{MATERIAL}_{LAMINATE}/Graficas:
+- Final_ForceDisp_vs_Experimental.(png/pdf)
+- Final_CohesiveLaw.(png/pdf)
+- Evolution_ForceDisp_Live.(png/pdf)
+- Evolution_Cohesive_Live.(png/pdf)
+- Convergence_*. (png/pdf)
+- DIAG_PairPlot_*. (png/pdf)
+
+Inside ./{MODE}_{MATERIAL}_{LAMINATE}/:
+- individual_errors.csv
+- exactly one NUMERICAL_... file (final best rerun)
+
+## Troubleshooting
+
+1. "Abaqus launcher not found"
+- Run from Abaqus Command Prompt
+- Or set ABAQUS_BAT to the full path of abaqus.bat
+- Or set abaqus_launcher in the script to an absolute path
+
+2. Abaqus runs but no NUMERICAL_*.txt appears
+- Check Ct_Shell.py:
+  * must write NUMERICAL_{MODE}_{MATERIAL}_{LAMINATE}*.txt into outdir (repo root)
+  * must read the correct CSV row based on READ_FLAG
+
+3. Very large errors / R2 = -inf
+- Often caused by insufficient overlap between numerical and experimental displacement ranges.
+- Verify disp_min and disp_max in Mechanical_properties.csv.
+
+4. Runtime
+- Each evaluation launches Abaqus, so runtime is dominated by simulation cost.
+- Increase POP_SIZE / N_GENERATIONS gradually based on your compute budget.
+
+## Good research practice
+
+- Track individual_errors.csv for traceability and reproducibility.
+- Document Abaqus version, mesh, boundary conditions, and step definitions as they affect calibration.
 
 
 ## Citation
@@ -94,86 +169,4 @@ If you use this software in your research or found it interesting for your devel
   doi = {10.xxxx/xxxx},
   url = {[https://doi.org/10.xxxx/xxxx](https://doi.org/10.xxxx/xxxx)}
 }
-
-
-## 🛠️ Requirements
-
-To ensure the calibration script runs correctly, please verify the following prerequisites:
-
-### 🐍 Python Environment
-* **Version:** Python 3.9+ (Recommended: **3.10** or **3.11**).
-* **Packages:** Install all necessary dependencies using the provided requirements file:
-  ```bash
-  pip install -r requirements.txt
-## Requirements
----------------
-- Python 3.9+ (recommended 3.10/3.11)
-- Abaqus installed and callable as "abaqus" from terminal or Abaqus Command Prompt
-- Python packages:
-  pip install -r requirements.txt
-
-IMPORTANT (Windows):
-- Most reliable: run from "Abaqus Command Prompt"
-  OR set environment variable:
-    ABAQUS_BAT = full\path\to\abaqus.bat
-- numpy
-- matplotlib
-- scikit-learn
-- deap
-
-## How to run
--------------
-1. Verify these exist:
-    - Mechanical_properties.csv (repo root)
-    - Ct_Shell.py (repo root)
-    - ./Experimental/Exp_{MODE}_{MATERIAL}_{LAMINATE}.txt
-
-2. Edit ga_abaqus_cohesive_fit.py:
-    - MODE, MATERIAL, LAMINATE
-    - POP_SIZE, N_GENERATIONS, bounds, etc.
-    - LIVE_PLOTS = False if you want terminal-only execution
-
-3. Run:
-    python ga_abaqus_cohesive_fit.py
-
-## Outputs
-----------
-Inside ./{MODE}_{MATERIAL}_{LAMINATE}/Graficas:
-- Final_ForceDisp_vs_Experimental.(png/pdf)
-- Final_CohesiveLaw.(png/pdf)
-- Evolution_ForceDisp_Live.(png/pdf)
-- Evolution_Cohesive_Live.(png/pdf)
-- Convergence_*. (png/pdf)
-- DIAG_PairPlot_*. (png/pdf)
-
-Inside ./{MODE}_{MATERIAL}_{LAMINATE}/:
-- individual_errors.csv
-- exactly one NUMERICAL_... file (final best rerun)
-
-## Troubleshooting
-------------------
-1. "Abaqus launcher not found"
-- Run from Abaqus Command Prompt
-- Or set ABAQUS_BAT to the full path of abaqus.bat
-- Or set abaqus_launcher in the script to an absolute path
-
-2. Abaqus runs but no NUMERICAL_*.txt appears
-- Check Ct_Shell.py:
-  * must write NUMERICAL_{MODE}_{MATERIAL}_{LAMINATE}*.txt into outdir (repo root)
-  * must read the correct CSV row based on READ_FLAG
-
-3. Very large errors / R2 = -inf
-- Often caused by insufficient overlap between numerical and experimental displacement ranges.
-- Verify disp_min and disp_max in Mechanical_properties.csv.
-
-4. Runtime
-- Each evaluation launches Abaqus, so runtime is dominated by simulation cost.
-- Increase POP_SIZE / N_GENERATIONS gradually based on your compute budget.
-
-### Good research practice
--------------------------
-- Track individual_errors.csv for traceability and reproducibility.
-- Document Abaqus version, mesh, boundary conditions, and step definitions as they affect calibration.
-
-
 
